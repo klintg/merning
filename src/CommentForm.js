@@ -14,13 +14,24 @@ class CommentForm extends Component {
   handleAuthorChange(e) {
     this.setState({ author: e.target.value });
   }
+
   handleTextChange(e) {
     this.setState({ text: e.target.value });
   }
+
   handleSubmit(e) {
     e.preventDefault();
-    console.log(`${this.state.author} said "${this.state.text}"`)
-    //we will be tying this into the POST method in a bit
+    let author = this.state.author.trim();
+    let text = this.state.text.trim();
+    if (!text || !author) {
+      return;
+    }
+
+    // we pass them to the parent-CommentBox.
+    this.props.onCommentSubmit({ author: author, text: text });
+
+    // after that we empty the state.
+    this.setState({ author: '', text: ''});
   }
 
   render() {
