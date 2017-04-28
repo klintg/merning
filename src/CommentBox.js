@@ -14,7 +14,10 @@ class CommentBox extends Component {
 
     this.loadCommentsFromServer = this.loadCommentsFromServer.bind(this);
     this.handleCommentSubmit = this.handleCommentSubmit.bind(this);
+    this.handleCommentDelete = this.handleCommentDelete.bind(this);
+    this.handleCommentUpdate = this.handleCommentUpdate.bind(this);
   }
+
   loadCommentsFromServer() {
     axios.get(this.props.url)
       .then(res => {
@@ -24,13 +27,33 @@ class CommentBox extends Component {
 
   handleCommentSubmit(comment) {
     //add POST request
+    let comments = this.state.data;
+    comment.id = Date.now();
+    let newComments = comments.concat([comment]);
+    this.setState({ data: newComments });
+
     axios.post(this.props.url, comment)
-    .then(res => {
-      this.setState({ data: res});
-    })
+      .catch(err => {
+        console.error(err);
+        this.setState({ data: comments });
+      });
+  }
+
+  handleCommentDelete(id) {
+    axios.delete(`${this.props.url}/${id}`)
+      .then(res => {
+        console.log('comment has been deleted')
+      })
+      .catch(err => {
+        console.err(err);
+      })
+  }
+
+  handleCommentUpdate(id, comment) {
+    axios.put(`${this.props.url}/${id}`, comment)
     .catch(err => {
-      console.error(err);
-    });
+      console.log(err);
+    })
   }
 
   componentDidMount() {
@@ -42,8 +65,12 @@ class CommentBox extends Component {
     return (
       <div style={ style.commentBox }>
         <h2>Comments:</h2>
-      <CommentList data={ this.state.data }/>
-      <CommentForm onCommentSubmit={this.handleCommentSubmit}/>
+        <CommentList
+          onCommentDelete={this.handleCommentDelete}
+          onCommentUpdate={this.handleCommentUpdate}
+          data={ this.state.data }
+        />
+        <CommentForm onCommentSubmit={this.handleCommentSubmit}/>
       </div>
     )
   }
